@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>VICE CITY - E-Sports Tournaments</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,6 +12,7 @@
             font-family: 'Poppins', sans-serif;
             background-color: #0c0a18; /* Deep space blue */
             color: #e0e0e0;
+            overflow-x: hidden;
         }
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
@@ -498,7 +499,7 @@
                         gamerTag: document.getElementById('gamer-tag').value,
                         isLeader: document.getElementById('is-leader').checked,
                         email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value,
+                        phoneNumber: document.getElementById('phone').value,
                         paymentStatus: 'unpaid',
                         createdAt: serverTimestamp()
                     };
@@ -664,6 +665,32 @@
             });
 
             if (scrollContainer) {
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                scrollContainer.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    scrollContainer.classList.add('cursor-grabbing');
+                    startX = e.pageX - scrollContainer.offsetLeft;
+                    scrollLeft = scrollContainer.scrollLeft;
+                });
+                scrollContainer.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    scrollContainer.classList.remove('cursor-grabbing');
+                });
+                scrollContainer.addEventListener('mouseup', () => {
+                    isDown = false;
+                    scrollContainer.classList.remove('cursor-grabbing');
+                });
+                scrollContainer.addEventListener('mousemove', (e) => {
+                    if(!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - scrollContainer.offsetLeft;
+                    const walk = (x - startX) * 2; //scroll-fast
+                    scrollContainer.scrollLeft = scrollLeft - walk;
+                });
+
                 const scrollAmount = 352; 
                 scrollLeftBtn.addEventListener('click', () => {
                     scrollContainer.scrollLeft -= scrollAmount;
@@ -728,7 +755,7 @@
                         ctx.textAlign = 'center';
                         ctx.fillText('GAME OVER', shooterCanvas.width / 2, shooterCanvas.height / 2);
                         ctx.font = '20px Orbitron';
-                        ctx.fillText('Press R to Restart', shooterCanvas.width / 2, shooterCanvas.height / 2 + 40);
+                        ctx.fillText('Tap to Restart', shooterCanvas.width / 2, shooterCanvas.height / 2 + 40);
                     }
                 }
 
@@ -762,9 +789,12 @@
                     }
                 });
                 shooterCanvas.addEventListener('click', () => {
-                    if (!gameOver && player) bullets.push({ x: player.x + player.width / 2 - 2.5, y: player.y, width: 5, height: 10, speed: 7 });
+                    if (gameOver) {
+                        initShooter();
+                        return;
+                    }
+                    if (player) bullets.push({ x: player.x + player.width / 2 - 2.5, y: player.y, width: 5, height: 10, speed: 7 });
                 });
-                window.addEventListener('keydown', (e) => { if (gameOver && e.code === 'KeyR') initShooter(); });
                 window.addEventListener('resize', initShooter);
                 
                 initShooter();
