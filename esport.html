@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VICE CITY - E-Sports Tournaments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0c0a18; /* Deep space blue */
+            color: #e0e0e0;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Starry Background Animation */
+        .starry-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: #0c0a18;
+        }
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+                radial-gradient(1px 1px at 80% 10%, #fff, transparent),
+                radial-gradient(1px 1px at 50% 70%, #fff, transparent),
+                radial-gradient(2px 2px at 90% 40%, #fff, transparent),
+                radial-gradient(2px 2px at 10% 90%, #fff, transparent),
+                radial-gradient(2px 2px at 40% 50%, #fff, transparent);
+            animation: twinkle 10s infinite linear;
+        }
+        @keyframes twinkle {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100vh); }
+        }
+
+        /* Flowing Glow Text Animation */
+        .flow-glow-text {
+            background: linear-gradient(90deg, #00ff9d, #00f2ff, #8a2be2, #ff00ff, #00ff9d);
+            background-size: 400% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: flow-glow 10s linear infinite;
+            text-shadow: 0 0 15px rgba(0, 255, 157, 0.5), 0 0 30px rgba(0, 242, 255, 0.3);
+        }
+        @keyframes flow-glow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+        
+        .static-glow {
+            font-weight: bold;
+            color: #00ff9d;
+            text-shadow: 0 0 8px rgba(0, 255, 157, 0.8), 0 0 12px rgba(0, 255, 157, 0.5);
+        }
+
+        /* Glass Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Horizontal Scroll Container */
+        .scroll-container {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+            scroll-behavior: smooth;
+        }
+        .scroll-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        /* Glowing Button */
+        .btn-glow {
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.7), 0 0 30px rgba(0, 255, 157, 0.4);
+            transform: scale(1.05);
+        }
+        
+        /* Scroll Buttons */
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(12, 10, 24, 0.6);
+            backdrop-filter: blur(5px);
+            color: #00ff9d;
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+        .scroll-btn:hover {
+            background: rgba(0, 255, 157, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.5);
+        }
+        .scroll-btn.left {
+            left: -25px;
+        }
+        .scroll-btn.right {
+            right: -25px;
+        }
+        
+        /* Game Canvas */
+        .game-canvas {
+            background-color: #000;
+            border-radius: 0.5rem;
+            border: 2px solid #00ff9d;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.3), 0 0 30px rgba(0, 255, 157, 0.2);
+            animation: glow-border 5s infinite alternate;
+        }
+        @keyframes glow-border {
+            from { box-shadow: 0 0 15px rgba(0, 255, 157, 0.3), 0 0 30px rgba(0, 255, 157, 0.2); }
+            to { box-shadow: 0 0 25px rgba(0, 242, 255, 0.5), 0 0 50px rgba(0, 242, 255, 0.3); }
+        }
+        
+        .modal { display: none; }
+        .modal.active { display: flex; }
+
+        /* Leaderboard Rotator */
+        #leaderboard-rotator {
+            perspective: 1000px;
+        }
+        .leaderboard-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            transition: transform 0.6s ease;
+        }
+        .leaderboard-card.active {
+            transform: rotateY(0deg);
+        }
+
+        /* Leaderboard Glowing Border */
+        .leaderboard-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent,
+                rgba(0, 255, 157, 0.3),
+                transparent 30%
+            );
+            animation: rotate-glow 6s linear infinite;
+            z-index: -1;
+        }
+        @keyframes rotate-glow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Spinner for loading state */
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #00ff9d;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="starry-background">
+        <div class="stars"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-black/30 backdrop-blur-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-orbitron font-bold tracking-widest flex items-center">
+                <svg class="w-10 h-10 mr-3" style="filter: drop-shadow(0 0 8px #00ff9d);" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 95C35 95 25 85 25 70C25 55 35 45 50 45C65 45 75 55 75 70C75 85 65 95 50 95Z" fill="#32CD32"/>
+                    <path d="M50 5C52.7614 5 55 7.23858 55 10V50C55 52.7614 52.7614 55 50 55C47.2386 55 45 52.7614 45 50V10C45 7.23858 47.2386 5 50 5Z" fill="#8B4513"/>
+                    <g transform="rotate(45 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+                    <g transform="rotate(-45 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+                     <g transform="rotate(135 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+                    <g transform="rotate(-135 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+                </svg>
+                VICE CITY
+            </h1>
+            <nav class="hidden md:flex space-x-8 font-semibold">
+                <a href="#games" class="hover:text-cyan-400 transition-colors">Games</a>
+                <a href="#leaderboard" class="hover:text-cyan-400 transition-colors">Leaderboard</a>
+                <a href="#arcade" class="hover:text-cyan-400 transition-colors">Arcade</a>
+                <a href="#suggest" class="hover:text-cyan-400 transition-colors">Suggest</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center text-center px-6">
+        <div>
+            <h2 class="text-6xl md:text-9xl font-orbitron font-black uppercase flow-glow-text">
+                Dominate the Arena
+            </h2>
+            <p class="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+                Welcome to VICE CITY, the premier hub for competitive gaming. Join our tournaments, prove your skill, and claim your glory.
+            </p>
+            <div class="mt-10">
+                <a href="#games" class="bg-gradient-to-r from-green-400 to-cyan-500 text-gray-900 font-bold text-xl px-12 py-4 rounded-full btn-glow">
+                    Browse Tournaments
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Section -->
+    <section id="games" class="py-20">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-6xl font-orbitron font-bold">Choose Your Game</h2>
+                <p class="mt-4 text-gray-400">Scroll to find your arena.</p>
+            </div>
+        </div>
+        <div class="relative max-w-7xl mx-auto">
+            <div id="scroll-container" class="w-full overflow-x-auto scroll-container pb-8">
+                <div class="flex space-x-8 px-6 w-max">
+                    
+                    <div class="glass-card rounded-2xl p-6 w-80 flex-shrink-0">
+                        <img src="https://placehold.co/400x225/00ff9d/0c0a18?text=BGMI" class="rounded-lg mb-4 h-40 w-full object-cover">
+                        <h3 class="text-2xl font-orbitron font-bold">BGMI Showdown</h3>
+                        <p class="text-gray-400 text-sm mt-1">Squads | Erangel</p>
+                        <button class="register-btn mt-6 w-full bg-green-500 text-gray-900 font-bold py-3 px-6 rounded-full text-center hover:bg-green-400 transition-colors" data-tournament="BGMI Showdown">Register</button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 w-80 flex-shrink-0">
+                        <img src="https://placehold.co/400x225/ff00ff/0c0a18?text=Valorant" class="rounded-lg mb-4 h-40 w-full object-cover">
+                        <h3 class="text-2xl font-orbitron font-bold">Valorant Clash</h3>
+                        <p class="text-gray-400 text-sm mt-1">5v5 | Competitive</p>
+                        <button class="register-btn mt-6 w-full bg-pink-500 text-white font-bold py-3 px-6 rounded-full text-center hover:bg-pink-600 transition-colors" data-tournament="Valorant Clash">Register</button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 w-80 flex-shrink-0">
+                        <img src="https://placehold.co/400x225/f59e0b/0c0a18?text=CODM" class="rounded-lg mb-4 h-40 w-full object-cover">
+                        <h3 class="text-2xl font-orbitron font-bold">CODM Mobile Mayhem</h3>
+                        <p class="text-gray-400 text-sm mt-1">Multiplayer | Hardpoint</p>
+                        <button class="register-btn mt-6 w-full bg-amber-500 text-gray-900 font-bold py-3 px-6 rounded-full text-center hover:bg-amber-400 transition-colors" data-tournament="CODM Mobile Mayhem">Register</button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 w-80 flex-shrink-0">
+                        <img src="https://placehold.co/400x225/34d399/0c0a18?text=Free+Fire" class="rounded-lg mb-4 h-40 w-full object-cover">
+                        <h3 class="text-2xl font-orbitron font-bold">Free Fire Frenzy</h3>
+                        <p class="text-gray-400 text-sm mt-1">Battle Royale | Squads</p>
+                        <button class="register-btn mt-6 w-full bg-emerald-500 text-gray-900 font-bold py-3 px-6 rounded-full text-center hover:bg-emerald-400 transition-colors" data-tournament="Free Fire Frenzy">Register</button>
+                    </div>
+                    
+                    <div class="glass-card rounded-2xl p-6 w-80 flex-shrink-0">
+                        <img src="https://placehold.co/400x225/8a2be2/0c0a18?text=Smash+Cart" class="rounded-lg mb-4 h-40 w-full object-cover">
+                        <h3 class="text-2xl font-orbitron font-bold">Smash Cart Grand Prix</h3>
+                        <p class="text-gray-400 text-sm mt-1">Solo | Racing</p>
+                        <button class="register-btn mt-6 w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-full text-center hover:bg-purple-500 transition-colors" data-tournament="Smash Cart Grand Prix">Register</button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 w-80 flex-shrink-0">
+                        <img src="https://placehold.co/400x225/00f2ff/0c0a18?text=CS+2" class="rounded-lg mb-4 h-40 w-full object-cover">
+                        <h3 class="text-2xl font-orbitron font-bold">CS 2 Face-Off</h3>
+                        <p class="text-gray-400 text-sm mt-1">5v5 | Defuse</p>
+                        <button class="register-btn mt-6 w-full bg-cyan-400 text-gray-900 font-bold py-3 px-6 rounded-full text-center hover:bg-cyan-300 transition-colors" data-tournament="CS 2 Face-Off">Register</button>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 w-80 flex-shrink-0">
+                        <img src="https://placehold.co/400x225/6366f1/0c0a18?text=Fortnite" class="rounded-lg mb-4 h-40 w-full object-cover">
+                        <h3 class="text-2xl font-orbitron font-bold">Fortnite Build Battle</h3>
+                        <p class="text-gray-400 text-sm mt-1">Solo | Battle Royale</p>
+                        <button class="register-btn mt-6 w-full bg-indigo-500 text-white font-bold py-3 px-6 rounded-full text-center hover:bg-indigo-400 transition-colors" data-tournament="Fortnite Build Battle">Register</button>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Scroll Buttons -->
+            <button id="scroll-left-btn" class="scroll-btn left hidden sm:flex">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="scroll-right-btn" class="scroll-btn right hidden sm:flex">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Leaderboard Section -->
+    <section id="leaderboard" class="py-20 px-6">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h2 class="text-4xl md:text-6xl font-orbitron font-bold mb-12">Hall of Fame</h2>
+            <div class="leaderboard-container glass-card rounded-2xl p-8 relative overflow-hidden">
+                <div id="leaderboard-rotator" class="relative h-96">
+                    <!-- Leaderboard cards will be injected here -->
+                </div>
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-4">
+                    <button id="prev-leaderboard" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition"><i class="fas fa-arrow-left"></i></button>
+                    <button id="next-leaderboard" class="bg-white/10 p-2 rounded-full hover:bg-white/20 transition"><i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Arcade Zone -->
+    <section id="arcade" class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-6xl font-orbitron font-bold">Arcade Zone</h2>
+                <p class="mt-4 text-gray-400">Don't get bored while waiting for the next tournament.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Space Shooter Game -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-3xl font-orbitron font-bold text-center mb-4">Starfire Shooter</h3>
+                    <canvas id="spaceShooterCanvas" class="w-full h-auto aspect-video game-canvas cursor-none"></canvas>
+                    <p class="text-center text-sm mt-4 text-gray-400">Move mouse to control ship, Left-Click to shoot.</p>
+                </div>
+                <!-- Retro Ping Game -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-3xl font-orbitron font-bold text-center mb-4">Retro Ping</h3>
+                    <canvas id="pongCanvas" class="w-full h-auto aspect-video game-canvas cursor-pointer"></canvas>
+                     <p class="text-center text-sm mt-4 text-gray-400">Move mouse to control paddle. Click to start.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Suggest a Game Section -->
+    <section id="suggest" class="py-20 px-6">
+        <div class="container mx-auto max-w-3xl text-center">
+            <h2 class="text-4xl md:text-6xl font-orbitron font-bold">Request a Game</h2>
+            <p class="mt-4 text-gray-400">Don't see your favorite game? Tell us what to add next and we'll consider it for our next event!</p>
+            <form id="suggestion-form" class="mt-10 flex flex-col sm:flex-row gap-4">
+                <input type="text" placeholder="Enter game name (e.g., Apex Legends)" class="w-full bg-gray-800 border border-gray-700 rounded-full px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition">
+                <button type="submit" class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold px-8 py-4 rounded-full btn-glow">Submit Idea</button>
+            </form>
+            <div id="suggestion-thanks" class="hidden mt-6 p-4 bg-green-500/20 text-green-300 rounded-lg">
+                <p>Thanks for the suggestion! We'll look into it. 🔥</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black/30 border-t border-gray-800 py-8">
+        <div class="container mx-auto text-center text-gray-400">
+            <div class="mb-4">
+                <a href="tel:+919313011448" class="hover:text-cyan-400 transition-colors">
+                    <i class="fas fa-phone mr-2"></i>+91 9313011448
+                </a>
+            </div>
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="#" class="hover:text-cyan-400"><i class="fab fa-twitter text-2xl"></i></a>
+                <a href="#" class="hover:text-cyan-400"><i class="fab fa-instagram text-2xl"></i></a>
+                <a href="#" class="hover:text-cyan-400"><i class="fab fa-discord text-2xl"></i></a>
+                <a href="#" class="hover:text-cyan-400"><i class="fab fa-youtube text-2xl"></i></a>
+            </div>
+            <p class="text-sm mb-2">&copy; 2024 VICE CITY E-Sports. All Rights Reserved.</p>
+            <p class="text-lg mt-4">Made by <span class="static-glow">GETIT</span></p>
+        </div>
+    </footer>
+
+    <!-- Registration Modal -->
+    <div id="registration-modal" class="modal fixed inset-0 bg-black bg-opacity-70 items-center justify-center z-50">
+        <div class="glass-card rounded-2xl p-8 w-full max-w-md m-4">
+            <h2 id="modal-title" class="text-3xl font-orbitron font-bold mb-6 text-center">Register for Tournament</h2>
+            <form id="registration-form">
+                <input type="hidden" id="tournament-name">
+                <div class="space-y-4">
+                    <div class="relative">
+                        <label for="team-name" class="block text-sm font-medium text-gray-300">Team Name</label>
+                        <input type="text" id="team-name" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        <button type="button" id="suggest-name-btn" class="absolute right-3 top-8 text-xs bg-cyan-500/20 text-cyan-300 font-semibold px-2 py-1 rounded hover:bg-cyan-500/40">✨ Suggest Name</button>
+                    </div>
+                    <div>
+                        <label for="player-name" class="block text-sm font-medium text-gray-300">Your Full Name</label>
+                        <input type="text" id="player-name" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    </div>
+                    <div>
+                        <label for="gamer-tag" class="block text-sm font-medium text-gray-300">Your Gamer Tag / In-Game Name</label>
+                        <input type="text" id="gamer-tag" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    </div>
+                     <div class="flex items-center">
+                        <input type="checkbox" id="is-leader" class="h-4 w-4 bg-gray-800 border-gray-600 text-cyan-400 focus:ring-cyan-500 rounded">
+                        <label for="is-leader" class="ml-2 block text-sm text-gray-300">I am the team leader</label>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
+                        <input type="email" id="email" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-300">Phone Number</label>
+                        <input type="tel" id="phone" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-8">
+                    <button type="button" id="cancel-register-btn" class="bg-gray-600 text-white font-bold px-6 py-2 rounded-full hover:bg-gray-500">Cancel</button>
+                    <button type="submit" class="bg-gradient-to-r from-green-400 to-cyan-500 text-gray-900 font-bold px-6 py-2 rounded-full btn-glow">Submit Registration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            let db, auth, appId;
+
+            // --- Firebase and Registration Logic ---
+            async function main() {
+                const firebaseConfig = {
+                  apiKey: "AIzaSyCYusn8iUJhiQHKBKFnIgzo82pY4fXjc38",
+                  authDomain: "meethe-275ef.firebaseapp.com",
+                  projectId: "meethe-275ef",
+                  storageBucket: "meethe-275ef.appspot.com",
+                  messagingSenderId: "841227918612",
+                  appId: "1:841227918612:web:715d9d6a3051a00a023601",
+                  measurementId: "G-CX9SGS1K01"
+                };
+                appId = 'vice-city-esports';
+
+                if (!firebaseConfig || !firebaseConfig.apiKey) {
+                    console.error("Firebase config is missing!");
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("User authenticated:", user.uid);
+                        setupLeaderboard();
+                    }
+                });
+
+                try {
+                    if (!auth.currentUser) await signInAnonymously(auth);
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                }
+
+                const registrationModal = document.getElementById('registration-modal');
+                const registrationForm = document.getElementById('registration-form');
+                const cancelRegisterBtn = document.getElementById('cancel-register-btn');
+                const modalTitle = document.getElementById('modal-title');
+                const tournamentNameInput = document.getElementById('tournament-name');
+                const suggestNameBtn = document.getElementById('suggest-name-btn');
+
+                document.querySelectorAll('.register-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const tournamentName = button.dataset.tournament;
+                        modalTitle.textContent = `Register for ${tournamentName}`;
+                        tournamentNameInput.value = tournamentName;
+                        registrationModal.classList.add('active');
+                    });
+                });
+
+                cancelRegisterBtn.addEventListener('click', () => {
+                    registrationModal.classList.remove('active');
+                });
+
+                registrationForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const registrationData = {
+                        tournament: tournamentNameInput.value,
+                        teamName: document.getElementById('team-name').value,
+                        playerName: document.getElementById('player-name').value,
+                        gamerTag: document.getElementById('gamer-tag').value,
+                        isLeader: document.getElementById('is-leader').checked,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        paymentStatus: 'unpaid',
+                        createdAt: serverTimestamp()
+                    };
+
+                    try {
+                        const registrationsCollection = collection(db, `/artifacts/${appId}/public/data/registrations`);
+                        await addDoc(registrationsCollection, registrationData);
+                        alert("Registration Confirmed! ✅\n\nThanks for signing up. Your spot is secured!\n\nNext Step: You will be added to the official tournament WhatsApp group within the next few hours. All important updates, schedules, and communications will happen there.\n\nGet ready to compete!");
+                        registrationForm.reset();
+                        registrationModal.classList.remove('active');
+                    } catch (error) {
+                        console.error("Error submitting registration: ", error);
+                        alert("Sorry, there was an issue with your registration. Please try again.");
+                    }
+                });
+
+                suggestNameBtn.addEventListener('click', async () => {
+                    const originalText = suggestNameBtn.innerHTML;
+                    suggestNameBtn.innerHTML = `<span class="loader"></span>`;
+                    suggestNameBtn.disabled = true;
+
+                    const prompt = "Generate a cool, edgy, futuristic e-sports team name suitable for a tournament called VICE CITY. The name should be one or two words. Provide only the name, nothing else.";
+                    const teamName = await callGeminiForText(prompt);
+
+                    if (teamName) {
+                        document.getElementById('team-name').value = teamName.trim().replace(/"/g, '');
+                    } else {
+                        alert("Could not generate a name. Please try again.");
+                    }
+
+                    suggestNameBtn.innerHTML = originalText;
+                    suggestNameBtn.disabled = false;
+                });
+            }
+
+            function setupLeaderboard() {
+                const rotator = document.getElementById('leaderboard-rotator');
+                const prevBtn = document.getElementById('prev-leaderboard');
+                const nextBtn = document.getElementById('next-leaderboard');
+                let leaderboards = {};
+                let gameNames = [];
+                let currentIndex = 0;
+
+                const games = [
+                    "BGMI Showdown", "Valorant Clash", "CODM Mobile Mayhem", 
+                    "Free Fire Frenzy", "Smash Cart Grand Prix", "CS 2 Face-Off", "Fortnite Build Battle"
+                ];
+
+                games.forEach(game => {
+                    const leaderboardDocRef = doc(db, `/artifacts/${appId}/public/data/leaderboards`, game);
+                    onSnapshot(leaderboardDocRef, (doc) => {
+                        if (doc.exists() && doc.data().ranks && doc.data().ranks.length > 0) {
+                            leaderboards[game] = doc.data().ranks.sort((a, b) => a.rank - b.rank);
+                        } else {
+                            leaderboards[game] = [{rank: 1, name: "TBD", achievement: "Top Spot Open!"}];
+                        }
+                        gameNames = Object.keys(leaderboards);
+                        renderLeaderboard(true); // Initial render
+                    });
+                });
+
+                function renderLeaderboard(isInitial = false) {
+                    if (gameNames.length === 0) return;
+                    
+                    const game = gameNames[currentIndex];
+                    const ranks = leaderboards[game];
+                    
+                    let ranksHtml = '';
+                    ranks.forEach(r => {
+                        ranksHtml += `
+                            <tr class="border-b border-gray-700/50">
+                                <td class="py-3 px-2 text-2xl font-orbitron">${r.rank}</td>
+                                <td class="py-3 px-2 text-cyan-400 font-bold">${r.name}</td>
+                                <td class="py-3 px-2 text-gray-300">${r.achievement}</td>
+                            </tr>
+                        `;
+                    });
+
+                    const newCard = document.createElement('div');
+                    newCard.className = 'leaderboard-card';
+                    newCard.innerHTML = `
+                        <h3 class="text-3xl font-orbitron font-bold text-center mb-4">${game}</h3>
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b-2 border-cyan-400">
+                                    <th class="pb-2 w-16">Rank</th>
+                                    <th class="pb-2">Player/Team</th>
+                                    <th class="pb-2">Achievement</th>
+                                </tr>
+                            </thead>
+                            <tbody>${ranksHtml}</tbody>
+                        </table>
+                    `;
+
+                    const oldCard = rotator.querySelector('.leaderboard-card');
+                    if (oldCard && !isInitial) {
+                        oldCard.classList.remove('active');
+                        setTimeout(() => {
+                            rotator.innerHTML = '';
+                            rotator.appendChild(newCard);
+                            setTimeout(() => newCard.classList.add('active'), 50);
+                        }, 300);
+                    } else {
+                         rotator.innerHTML = '';
+                         rotator.appendChild(newCard);
+                         setTimeout(() => newCard.classList.add('active'), 50);
+                    }
+                }
+
+                prevBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex - 1 + gameNames.length) % gameNames.length;
+                    renderLeaderboard();
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex + 1) % gameNames.length;
+                    renderLeaderboard();
+                });
+            }
+            
+            async function callGeminiForText(prompt) {
+                const apiKey = ""; // Injected by environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                     if (!response.ok) throw new Error(`API call failed with status: ${response.status}`);
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        return result.candidates[0].content.parts[0].text;
+                    }
+                } catch (error) {
+                    console.error("Gemini API call error:", error);
+                    return null;
+                }
+                return null;
+            }
+
+            main();
+            
+            // --- Non-Firebase Event Listeners and Game Logic ---
+            const suggestionForm = document.getElementById('suggestion-form');
+            const suggestionThanks = document.getElementById('suggestion-thanks');
+            const scrollContainer = document.getElementById('scroll-container');
+            const scrollLeftBtn = document.getElementById('scroll-left-btn');
+            const scrollRightBtn = document.getElementById('scroll-right-btn');
+
+            suggestionForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = suggestionForm.querySelector('input');
+                if (input.value.trim() !== '') {
+                    suggestionThanks.classList.remove('hidden');
+                    input.value = '';
+                    setTimeout(() => {
+                        suggestionThanks.classList.add('hidden');
+                    }, 5000);
+                }
+            });
+
+            if (scrollContainer) {
+                const scrollAmount = 352; 
+                scrollLeftBtn.addEventListener('click', () => {
+                    scrollContainer.scrollLeft -= scrollAmount;
+                });
+                scrollRightBtn.addEventListener('click', () => {
+                    scrollContainer.scrollLeft += scrollAmount;
+                });
+            }
+
+            // --- Space Shooter Game ---
+            const shooterCanvas = document.getElementById('spaceShooterCanvas');
+            if (shooterCanvas) {
+                const ctx = shooterCanvas.getContext('2d');
+                let player, bullets, enemies, score, gameOver, enemyInterval;
+                const playerWidth = 20, playerHeight = 20;
+                
+                function resizeShooterCanvas() {
+                    const container = shooterCanvas.parentElement;
+                    shooterCanvas.width = container.clientWidth;
+                    shooterCanvas.height = container.clientWidth / (16/9);
+                }
+
+                function initShooter() {
+                    resizeShooterCanvas();
+                    player = { x: shooterCanvas.width / 2 - playerWidth / 2, y: shooterCanvas.height - playerHeight - 10, width: playerWidth, height: playerHeight, speed: 5 };
+                    bullets = [];
+                    enemies = [];
+                    score = 0;
+                    gameOver = false;
+                    if (enemyInterval) clearInterval(enemyInterval);
+                    enemyInterval = setInterval(() => {
+                        if (!gameOver) {
+                            const size = 20;
+                            const x = Math.random() * (shooterCanvas.width - size);
+                            enemies.push({ x, y: -size, width: size, height: size, speed: 2 });
+                        }
+                    }, 1000);
+                }
+
+                function drawShooter() {
+                    ctx.clearRect(0, 0, shooterCanvas.width, shooterCanvas.height);
+                    if (!player) return;
+                    ctx.fillStyle = '#00ff9d';
+                    ctx.beginPath();
+                    ctx.moveTo(player.x + player.width / 2, player.y);
+                    ctx.lineTo(player.x, player.y + player.height);
+                    ctx.lineTo(player.x + player.width, player.y + player.height);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = '#ff00ff';
+                    bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+                    ctx.fillStyle = '#00f2ff';
+                    enemies.forEach(e => ctx.fillRect(e.x, e.y, e.width, e.height));
+                    ctx.fillStyle = 'white';
+                    ctx.font = '20px Orbitron';
+                    ctx.fillText('Score: ' + score, 10, 30);
+                    if (gameOver) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                        ctx.fillRect(0, 0, shooterCanvas.width, shooterCanvas.height);
+                        ctx.fillStyle = 'red';
+                        ctx.font = '40px Orbitron';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('GAME OVER', shooterCanvas.width / 2, shooterCanvas.height / 2);
+                        ctx.font = '20px Orbitron';
+                        ctx.fillText('Press R to Restart', shooterCanvas.width / 2, shooterCanvas.height / 2 + 40);
+                    }
+                }
+
+                function updateShooter() {
+                    if (gameOver) return;
+                    bullets.forEach((b, i) => { b.y -= b.speed; if (b.y < 0) bullets.splice(i, 1); });
+                    enemies.forEach((e, ei) => {
+                        e.y += e.speed;
+                        if (e.y > shooterCanvas.height) enemies.splice(ei, 1);
+                        if (player && e.x < player.x + player.width && e.x + e.width > player.x && e.y < player.y + player.height && e.y + e.height > player.y) gameOver = true;
+                        bullets.forEach((b, bi) => {
+                            if (e.x < b.x + b.width && e.x + e.width > b.x && e.y < b.y + b.height && e.y + e.height > b.y) {
+                                enemies.splice(ei, 1);
+                                bullets.splice(bi, 1);
+                                score += 10;
+                            }
+                        });
+                    });
+                }
+
+                function shooterLoop() {
+                    updateShooter();
+                    drawShooter();
+                    requestAnimationFrame(shooterLoop);
+                }
+
+                shooterCanvas.addEventListener('mousemove', (e) => {
+                    if(player) {
+                        const rect = shooterCanvas.getBoundingClientRect();
+                        player.x = e.clientX - rect.left - player.width / 2;
+                    }
+                });
+                shooterCanvas.addEventListener('click', () => {
+                    if (!gameOver && player) bullets.push({ x: player.x + player.width / 2 - 2.5, y: player.y, width: 5, height: 10, speed: 7 });
+                });
+                window.addEventListener('keydown', (e) => { if (gameOver && e.code === 'KeyR') initShooter(); });
+                window.addEventListener('resize', initShooter);
+                
+                initShooter();
+                shooterLoop();
+            }
+
+            // --- Retro Ping Game ---
+            const pongCanvas = document.getElementById('pongCanvas');
+            if (pongCanvas) {
+                const ctx = pongCanvas.getContext('2d');
+                let ball, playerPaddle, computerPaddle, playerScore, computerScore;
+                const paddleWidth = 10, paddleHeight = 80;
+                let pongGameActive = false;
+                let pongGameOver = false;
+                const winningScore = 6;
+
+                function resizePongCanvas() {
+                    const container = pongCanvas.parentElement;
+                    pongCanvas.width = container.clientWidth;
+                    pongCanvas.height = container.clientWidth / (16/9);
+                }
+
+                function initPong() {
+                    resizePongCanvas();
+                    playerPaddle = { x: 10, y: pongCanvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, speed: 8 };
+                    computerPaddle = { x: pongCanvas.width - 10 - paddleWidth, y: pongCanvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, speed: 4 };
+                    ball = { x: pongCanvas.width / 2, y: pongCanvas.height / 2, radius: 7, speedX: 5, speedY: 5 };
+                    playerScore = 0;
+                    computerScore = 0;
+                    pongGameOver = false;
+                    pongGameActive = false;
+                    drawStartScreen();
+                }
+
+                function drawStartScreen() {
+                    ctx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
+                    drawPongElements();
+                    ctx.fillStyle = 'rgba(12, 10, 24, 0.7)';
+                    ctx.fillRect(0, 0, pongCanvas.width, pongCanvas.height);
+                    ctx.fillStyle = 'white';
+                    ctx.font = '30px Orbitron';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Click to Play', pongCanvas.width / 2, pongCanvas.height / 2);
+                }
+                
+                function drawGameOverScreen() {
+                    ctx.fillStyle = 'rgba(12, 10, 24, 0.8)';
+                    ctx.fillRect(0, 0, pongCanvas.width, pongCanvas.height);
+                    ctx.fillStyle = 'white';
+                    ctx.font = '40px Orbitron';
+                    ctx.textAlign = 'center';
+                    const winnerText = playerScore >= winningScore ? 'You Win!' : 'Computer Wins!';
+                    ctx.fillText(winnerText, pongCanvas.width / 2, pongCanvas.height / 2 - 20);
+                    ctx.font = '20px Orbitron';
+                    ctx.fillText('Click to Restart', pongCanvas.width / 2, pongCanvas.height / 2 + 30);
+                }
+
+                function drawPongElements() {
+                     if (!playerPaddle) return;
+                    // Draw paddles
+                    ctx.fillStyle = '#00ff9d';
+                    ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
+                    ctx.fillStyle = '#ff00ff';
+                    ctx.fillRect(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height);
+                    // Draw ball
+                    ctx.beginPath();
+                    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                    // Draw net
+                    ctx.beginPath();
+                    ctx.setLineDash([10, 15]);
+                    ctx.moveTo(pongCanvas.width / 2, 0);
+                    ctx.lineTo(pongCanvas.width / 2, pongCanvas.height);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    // Draw scores
+                    ctx.font = '40px Orbitron';
+                    ctx.fillStyle = '#00ff9d';
+                    ctx.fillText(playerScore, pongCanvas.width / 4, 50);
+                    ctx.fillStyle = '#ff00ff';
+                    ctx.fillText(computerScore, pongCanvas.width * 3 / 4, 50);
+                }
+
+                function drawPong() {
+                    ctx.clearRect(0, 0, pongCanvas.width, pongCanvas.height);
+                    drawPongElements();
+                    if(pongGameOver) drawGameOverScreen();
+                }
+
+                function updatePong() {
+                    ball.x += ball.speedX;
+                    ball.y += ball.speedY;
+                    if (ball.y + ball.radius > pongCanvas.height || ball.y - ball.radius < 0) ball.speedY = -ball.speedY;
+                    if ((ball.x - ball.radius < playerPaddle.x + playerPaddle.width && ball.y > playerPaddle.y && ball.y < playerPaddle.y + playerPaddle.height) ||
+                        (ball.x + ball.radius > computerPaddle.x && ball.y > computerPaddle.y && ball.y < computerPaddle.y + computerPaddle.height)) {
+                        ball.speedX = -ball.speedX;
+                    }
+                    if (ball.x + ball.radius < 0) { computerScore++; resetBall(); } 
+                    else if (ball.x - ball.radius > pongCanvas.width) { playerScore++; resetBall(); }
+                    const paddleCenter = computerPaddle.y + computerPaddle.height / 2;
+                    if (paddleCenter < ball.y - 35) computerPaddle.y += computerPaddle.speed;
+                    else if (paddleCenter > ball.y + 35) computerPaddle.y -= computerPaddle.speed;
+                }
+                
+                function checkWin() {
+                    if (playerScore >= winningScore || computerScore >= winningScore) {
+                        pongGameActive = false;
+                        pongGameOver = true;
+                    }
+                }
+
+                function resetBall() {
+                    checkWin();
+                    if (!pongGameOver) {
+                        ball.x = pongCanvas.width / 2;
+                        ball.y = pongCanvas.height / 2;
+                        ball.speedX = -ball.speedX;
+                        ball.speedY = (Math.random() > 0.5 ? 1 : -1) * 5;
+                    }
+                }
+
+                function pongLoop() {
+                    if (pongGameActive) {
+                        updatePong();
+                    }
+                    drawPong();
+                    requestAnimationFrame(pongLoop);
+                }
+
+                pongCanvas.addEventListener('mousemove', (e) => {
+                    if (pongGameActive && playerPaddle) {
+                        const rect = pongCanvas.getBoundingClientRect();
+                        let mouseY = e.clientY - rect.top;
+                        playerPaddle.y = mouseY - playerPaddle.height / 2;
+                        if (playerPaddle.y < 0) playerPaddle.y = 0;
+                        if (playerPaddle.y > pongCanvas.height - playerPaddle.height) playerPaddle.y = pongCanvas.height - playerPaddle.height;
+                    }
+                });
+
+                pongCanvas.addEventListener('click', () => {
+                    if (pongGameOver) {
+                        initPong();
+                    }
+                    if (!pongGameActive) {
+                        pongGameActive = true;
+                        pongCanvas.style.cursor = 'none';
+                    }
+                });
+
+                window.addEventListener('resize', initPong);
+                
+                initPong();
+                pongLoop();
+            }
+        });
+    </script>
+</body>
+</html>
