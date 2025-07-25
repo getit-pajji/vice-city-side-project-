@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VICE CITY - Admin Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0c0a18;
+            color: #e0e0e0;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glass-pane {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body>
+    <div id="app-container" class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="mb-8 flex items-center space-x-4">
+             <svg class="w-12 h-12" style="filter: drop-shadow(0 0 8px #00ff9d);" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 95C35 95 25 85 25 70C25 55 35 45 50 45C65 45 75 55 75 70C75 85 65 95 50 95Z" fill="#32CD32"/>
+                <path d="M50 5C52.7614 5 55 7.23858 55 10V50C55 52.7614 52.7614 55 50 55C47.2386 55 45 52.7614 45 50V10C45 7.23858 47.2386 5 50 5Z" fill="#8B4513"/>
+                <g transform="rotate(45 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+                <g transform="rotate(-45 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+                <g transform="rotate(135 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+                <g transform="rotate(-135 50 10)"><path d="M50 10 C 70 10, 70 40, 50 40 C 30 40, 30 10, 50 10" fill="#228B22"/></g>
+            </svg>
+            <div>
+                <h1 class="text-4xl font-orbitron font-bold text-white">VICE CITY Admin</h1>
+                <p class="text-gray-400">Manage registrations and leaderboards.</p>
+            </div>
+        </header>
+
+        <section id="registrations" class="glass-pane p-6 rounded-lg shadow-lg mb-8">
+            <h2 class="text-2xl font-orbitron font-bold mb-4">Player Registrations</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="p-3">Tournament</th>
+                            <th class="p-3">Team Name</th>
+                            <th class="p-3">Gamer Tag</th>
+                            <th class="p-3">Player Name</th>
+                            <th class="p-3">Payment</th>
+                            <th class="p-3">Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrations-table-body">
+                        <tr><td colspan="6" class="p-4 text-center text-gray-400">Connecting to database...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="leaderboards" class="glass-pane p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-orbitron font-bold mb-4">Leaderboard Management</h2>
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <select id="leaderboard-game-select" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 flex-grow">
+                    <option value="BGMI Showdown">BGMI Showdown</option>
+                    <option value="Valorant Clash">Valorant Clash</option>
+                    <option value="CODM Mobile Mayhem">CODM Mobile Mayhem</option>
+                    <option value="Free Fire Frenzy">Free Fire Frenzy</option>
+                    <option value="Smash Cart Grand Prix">Smash Cart Grand Prix</option>
+                    <option value="CS 2 Face-Off">CS 2 Face-Off</option>
+                    <option value="Fortnite Build Battle">Fortnite Build Battle</option>
+                </select>
+                <button id="add-rank-btn" class="bg-cyan-500 text-gray-900 font-bold px-4 py-2 rounded-lg hover:bg-cyan-400 transition">Add Rank</button>
+            </div>
+             <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="p-3">Rank</th>
+                            <th class="p-3">Team / Player Name</th>
+                            <th class="p-3">Achievement</th>
+                            <th class="p-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-table-body">
+                        <!-- Leaderboard ranks will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add/Edit Rank Modal -->
+    <div id="rank-modal" class="modal fixed inset-0 bg-black bg-opacity-70 items-center justify-center z-50">
+        <div class="glass-pane rounded-2xl p-8 w-full max-w-md m-4">
+            <h2 id="rank-modal-title" class="text-2xl font-orbitron font-bold mb-6 text-center">Add New Rank</h2>
+            <form id="rank-form">
+                <input type="hidden" id="rank-id">
+                <div class="space-y-4">
+                    <div>
+                        <label for="rank-position" class="block text-sm font-medium text-gray-300">Rank</label>
+                        <input type="number" id="rank-position" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    </div>
+                    <div>
+                        <label for="rank-name" class="block text-sm font-medium text-gray-300">Team / Player Name</label>
+                        <input type="text" id="rank-name" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    </div>
+                    <div>
+                        <label for="rank-achievement" class="block text-sm font-medium text-gray-300">Achievement / Score</label>
+                        <input type="text" id="rank-achievement" required class="mt-1 block w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-8">
+                    <button type="button" id="cancel-rank-btn" class="bg-gray-600 text-white font-bold px-6 py-2 rounded-full hover:bg-gray-500">Cancel</button>
+                    <button type="submit" class="bg-gradient-to-r from-green-400 to-cyan-500 text-gray-900 font-bold px-6 py-2 rounded-full">Save Rank</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, doc, updateDoc, setDoc, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const appContainer = document.getElementById('app-container');
+            const registrationsTableBody = document.getElementById('registrations-table-body');
+            const leaderboardTableBody = document.getElementById('leaderboard-table-body');
+            const leaderboardGameSelect = document.getElementById('leaderboard-game-select');
+            const addRankBtn = document.getElementById('add-rank-btn');
+            const rankModal = document.getElementById('rank-modal');
+            const rankModalTitle = document.getElementById('rank-modal-title');
+            const rankForm = document.getElementById('rank-form');
+            const cancelRankBtn = document.getElementById('cancel-rank-btn');
+
+            let db, auth, appId;
+            let currentLeaderboard = 'BGMI Showdown';
+
+            async function main() {
+                const firebaseConfig = {
+                  apiKey: "AIzaSyCYusn8iUJhiQHKBKFnIgzo82pY4fXjc38",
+                  authDomain: "meethe-275ef.firebaseapp.com",
+                  projectId: "meethe-275ef",
+                  storageBucket: "meethe-275ef.appspot.com",
+                  messagingSenderId: "841227918612",
+                  appId: "1:841227918612:web:715d9d6a3051a00a023601",
+                  measurementId: "G-CX9SGS1K01"
+                };
+                appId = 'vice-city-esports';
+
+                if (!firebaseConfig || !firebaseConfig.apiKey) {
+                    appContainer.innerHTML = '<div class="text-red-500 text-center p-8">Error: Firebase configuration is missing.</div>';
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("Admin authenticated:", user.uid);
+                        loadRegistrations();
+                        loadLeaderboard(currentLeaderboard);
+                    }
+                });
+
+                try {
+                    if (!auth.currentUser) await signInAnonymously(auth);
+                } catch (error) {
+                     console.error("Authentication failed:", error);
+                     appContainer.innerHTML = `<div class="text-red-500 text-center p-8">Error: Authentication failed. ${error.message}</div>`;
+                }
+            }
+
+            function loadRegistrations() {
+                const registrationsCollection = collection(db, `/artifacts/${appId}/public/data/registrations`);
+                const q = query(registrationsCollection);
+                onSnapshot(q, (snapshot) => {
+                    registrationsTableBody.innerHTML = '';
+                    if (snapshot.empty) {
+                        registrationsTableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-400">No registrations yet.</td></tr>';
+                        return;
+                    }
+                    
+                    const sortedDocs = snapshot.docs.sort((a, b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0));
+
+                    sortedDocs.forEach(doc => {
+                        const reg = doc.data();
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-gray-800 hover:bg-gray-800/50';
+                        const regTime = reg.createdAt?.toDate ? reg.createdAt.toDate().toLocaleString() : 'N/A';
+                        const leaderIcon = reg.isLeader ? '<i class="fas fa-crown text-yellow-400 ml-2"></i>' : '';
+                        const paymentStatusClass = reg.paymentStatus === 'paid' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600';
+                        const paymentStatusText = reg.paymentStatus === 'paid' ? 'Paid' : 'Unpaid';
+
+                        tr.innerHTML = `
+                            <td class="p-3 font-bold">${reg.tournament}</td>
+                            <td class="p-3">${reg.teamName}</td>
+                            <td class="p-3 text-cyan-400">${reg.gamerTag}${leaderIcon}</td>
+                            <td class="p-3">${reg.playerName}</td>
+                            <td class="p-3"><button class="payment-status-btn text-white text-xs font-bold px-3 py-1 rounded-full ${paymentStatusClass}" data-id="${doc.id}" data-status="${reg.paymentStatus}">${paymentStatusText}</button></td>
+                            <td class="p-3 text-sm text-gray-400">${regTime}</td>
+                        `;
+                        registrationsTableBody.appendChild(tr);
+                    });
+                }, (error) => {
+                    console.error("Error fetching registrations: ", error);
+                    registrationsTableBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500">Error loading registrations: ${error.message}</td></tr>`;
+                });
+            }
+
+            function loadLeaderboard(game) {
+                const leaderboardDocRef = doc(db, `/artifacts/${appId}/public/data/leaderboards`, game);
+                onSnapshot(leaderboardDocRef, (doc) => {
+                    leaderboardTableBody.innerHTML = '';
+                    if (!doc.exists() || !doc.data().ranks || doc.data().ranks.length === 0) {
+                        leaderboardTableBody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">No ranks for this game yet.</td></tr>';
+                        return;
+                    }
+                    const ranks = doc.data().ranks.sort((a, b) => a.rank - b.rank);
+                    ranks.forEach(rank => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-gray-800';
+                        tr.innerHTML = `
+                            <td class="p-3 font-bold text-lg">${rank.rank}</td>
+                            <td class="p-3 text-cyan-400">${rank.name}</td>
+                            <td class="p-3">${rank.achievement}</td>
+                            <td class="p-3"><button class="delete-rank-btn text-red-500 hover:text-red-400" data-rankid="${rank.id}"><i class="fas fa-trash"></i></button></td>
+                        `;
+                        leaderboardTableBody.appendChild(tr);
+                    });
+                });
+            }
+
+            registrationsTableBody.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('payment-status-btn')) {
+                    const docId = e.target.dataset.id;
+                    const currentStatus = e.target.dataset.status;
+                    const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid';
+                    const docRef = doc(db, `/artifacts/${appId}/public/data/registrations`, docId);
+                    await updateDoc(docRef, { paymentStatus: newStatus });
+                }
+            });
+
+            leaderboardGameSelect.addEventListener('change', (e) => {
+                currentLeaderboard = e.target.value;
+                loadLeaderboard(currentLeaderboard);
+            });
+
+            addRankBtn.addEventListener('click', () => {
+                rankModalTitle.textContent = `Add Rank to ${currentLeaderboard}`;
+                rankForm.reset();
+                document.getElementById('rank-id').value = '';
+                rankModal.classList.add('active');
+            });
+
+            cancelRankBtn.addEventListener('click', () => rankModal.classList.remove('active'));
+
+            rankForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const rankData = {
+                    id: Date.now(), // Unique ID for the rank entry
+                    rank: parseInt(document.getElementById('rank-position').value),
+                    name: document.getElementById('rank-name').value,
+                    achievement: document.getElementById('rank-achievement').value
+                };
+                const leaderboardDocRef = doc(db, `/artifacts/${appId}/public/data/leaderboards`, currentLeaderboard);
+                await updateDoc(leaderboardDocRef, {
+                    ranks: arrayUnion(rankData)
+                }).catch(async (error) => {
+                    if (error.code === 'not-found') {
+                        await setDoc(leaderboardDocRef, { ranks: [rankData] });
+                    }
+                });
+                rankModal.classList.remove('active');
+            });
+            
+            leaderboardTableBody.addEventListener('click', async (e) => {
+                const target = e.target.closest('.delete-rank-btn');
+                if (target) {
+                    const rankId = parseInt(target.dataset.rankid);
+                    const leaderboardDocRef = doc(db, `/artifacts/${appId}/public/data/leaderboards`, currentLeaderboard);
+                    // This requires reading the doc, finding the item, and then updating the array.
+                    // For simplicity, we'll use arrayRemove which requires the full object.
+                    // A more robust solution would use a transaction to read, filter, and write.
+                    const leaderboardDoc = await getDoc(leaderboardDocRef);
+                    if (leaderboardDoc.exists()) {
+                        const ranks = leaderboardDoc.data().ranks;
+                        const rankToRemove = ranks.find(r => r.id === rankId);
+                        if(rankToRemove) {
+                           await updateDoc(leaderboardDocRef, {
+                               ranks: arrayRemove(rankToRemove)
+                           });
+                        }
+                    }
+                }
+            });
+
+            main();
+        });
+    </script>
+</body>
+</html>
