@@ -161,6 +161,51 @@
             animation: spin 1s linear infinite;
             display: inline-block;
         }
+
+        /* Radar Effect */
+        .radar-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vmin;
+            height: 80vmin;
+            max-width: 600px;
+            max-height: 600px;
+            z-index: -1;
+            border-radius: 50%;
+        }
+        .radar-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 157, 0.2);
+            animation: radar-pulse 4s infinite ease-out;
+        }
+        .radar-circle:nth-child(1) { width: 25%; height: 25%; top: 37.5%; left: 37.5%; animation-delay: 0s; }
+        .radar-circle:nth-child(2) { width: 50%; height: 50%; top: 25%; left: 25%; animation-delay: 1s; }
+        .radar-circle:nth-child(3) { width: 75%; height: 75%; top: 12.5%; left: 12.5%; animation-delay: 2s; }
+        .radar-circle:nth-child(4) { width: 100%; height: 100%; top: 0; left: 0; animation-delay: 3s; }
+
+        @keyframes radar-pulse {
+            0% { transform: scale(0.1); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        .radar-scanner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: conic-gradient(transparent, transparent 270deg, rgba(0, 255, 157, 0.4), transparent);
+            border-radius: 50%;
+            animation: radar-scan 4s linear infinite;
+        }
+        @keyframes radar-scan {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -183,6 +228,7 @@
                 VICE CITY
             </h1>
             <nav class="hidden md:flex space-x-8 font-semibold">
+                <a href="#news" class="hover:text-cyan-400 transition-colors">News</a>
                 <a href="#profile" class="hover:text-cyan-400 transition-colors">Player Profile</a>
                 <a href="#tournaments" class="hover:text-cyan-400 transition-colors">Tournaments</a>
                 <a href="#leaderboard" class="hover:text-cyan-400 transition-colors">Leaderboard</a>
@@ -193,8 +239,15 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="min-h-screen flex items-center justify-center text-center px-6">
-        <div>
+    <section class="min-h-screen flex items-center justify-center text-center px-6 relative">
+        <div class="radar-container">
+            <div class="radar-circle"></div>
+            <div class="radar-circle"></div>
+            <div class="radar-circle"></div>
+            <div class="radar-circle"></div>
+            <div class="radar-scanner"></div>
+        </div>
+        <div class="relative z-10">
             <h2 class="text-6xl md:text-9xl font-orbitron font-black uppercase flow-glow-text">
                 Dominate the Arena
             </h2>
@@ -205,6 +258,17 @@
                 <a href="#tournaments" class="bg-gradient-to-r from-green-400 to-cyan-500 text-gray-900 font-bold text-xl px-12 py-4 rounded-full btn-glow">
                     Browse Tournaments
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest News Section -->
+    <section id="news" class="py-20 px-6">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h2 class="text-4xl md:text-6xl font-orbitron font-bold mb-12">Latest News</h2>
+            <div id="news-list" class="space-y-6">
+                <!-- News items will be loaded here -->
+                <p class="text-gray-400">Loading latest announcements...</p>
             </div>
         </div>
     </section>
@@ -388,6 +452,14 @@
             </form>
         </div>
     </div>
+    
+    <!-- Custom Alert Modal -->
+    <div id="alert-modal" class="modal fixed inset-0 bg-black bg-opacity-70 items-center justify-center z-50">
+        <div class="glass-card rounded-2xl p-8 w-full max-w-sm m-4 text-center">
+            <p id="alert-message" class="text-lg mb-6"></p>
+            <button id="alert-ok-btn" class="bg-gradient-to-r from-green-400 to-cyan-500 text-gray-900 font-bold px-8 py-2 rounded-full">OK</button>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -424,6 +496,7 @@
                         console.log("User authenticated:", user.uid);
                         loadTournaments();
                         setupLeaderboard();
+                        loadNews();
                     }
                 });
 
@@ -443,6 +516,15 @@
                 const tournamentsGrid = document.getElementById('tournaments-grid');
                 const playerProfileForm = document.getElementById('player-profile-form');
                 const loadProfileBtn = document.getElementById('load-profile-btn');
+                const alertModal = document.getElementById('alert-modal');
+                const alertMessage = document.getElementById('alert-message');
+                const alertOkBtn = document.getElementById('alert-ok-btn');
+
+                function showCustomAlert(message) {
+                    alertMessage.textContent = message;
+                    alertModal.classList.add('active');
+                }
+                alertOkBtn.addEventListener('click', () => alertModal.classList.remove('active'));
 
                 tournamentsGrid.addEventListener('click', (e) => {
                     const button = e.target.closest('.register-btn');
@@ -492,13 +574,13 @@
                             transaction.update(tournamentDocRef, { registrationsCount: currentSlots + 1 });
                         });
 
-                        alert("Registration Confirmed! ✅\n\nYour spot is secured!");
+                        showCustomAlert("Registration Confirmed! ✅\n\nYour spot is secured!");
                         registrationForm.reset();
                         registrationModal.classList.remove('active');
 
                     } catch (error) {
                         console.error("Error submitting registration: ", error);
-                        alert(`Registration failed: ${error}`);
+                        showCustomAlert(`Registration failed: ${error}`);
                     }
                 });
 
@@ -506,7 +588,7 @@
                     e.preventDefault();
                     const phone = document.getElementById('profile-phone').value.trim();
                     if (phone.length < 10) {
-                        alert("Please enter a valid 10-digit phone number.");
+                        showCustomAlert("Please enter a valid 10-digit phone number.");
                         return;
                     }
 
@@ -525,18 +607,18 @@
                     try {
                         const playerDocRef = doc(db, `/artifacts/${appId}/public/data/players`, phone);
                         await setDoc(playerDocRef, profileData);
-                        alert("Player Profile Saved! You can now use your phone number to auto-fill registration forms.");
+                        showCustomAlert("Player Profile Saved! You can now use your phone number to auto-fill registration forms.");
                         playerProfileForm.reset();
                     } catch (error) {
                         console.error("Error saving profile:", error);
-                        alert("Could not save your profile. Please try again.");
+                        showCustomAlert("Could not save your profile. Please try again.");
                     }
                 });
 
                 loadProfileBtn.addEventListener('click', async () => {
                     const phone = document.getElementById('phone').value.trim();
                     if (phone.length < 10) {
-                        alert("Please enter your phone number to load your profile.");
+                        showCustomAlert("Please enter your phone number to load your profile.");
                         return;
                     }
                     
@@ -556,9 +638,9 @@
                         else if (gameName.includes('Free Fire')) gameId = data.gameIds["Free Fire"];
                         
                         document.getElementById('gamer-tag').value = gameId;
-                        alert("Profile loaded!");
+                        showCustomAlert("Profile loaded!");
                     } else {
-                        alert("No profile found for this phone number. Please create one first.");
+                        showCustomAlert("No profile found for this phone number. Please create one first.");
                     }
                 });
 
@@ -573,7 +655,7 @@
                     if (teamName) {
                         document.getElementById('team-name').value = teamName.trim().replace(/"/g, '');
                     } else {
-                        alert("Could not generate a name. Please try again.");
+                        showCustomAlert("Could not generate a name. Please try again.");
                     }
 
                     suggestNameBtn.innerHTML = '✨ Suggest';
@@ -630,6 +712,30 @@
                         tournamentsGrid.appendChild(card);
                     });
                  });
+            }
+            
+            function loadNews() {
+                const newsList = document.getElementById('news-list');
+                const newsCollection = collection(db, `/artifacts/${appId}/public/data/news`);
+                onSnapshot(newsCollection, (snapshot) => {
+                    newsList.innerHTML = '';
+                    if (snapshot.empty) {
+                        newsList.innerHTML = '<p class="text-gray-400">No news yet. Stay tuned!</p>';
+                        return;
+                    }
+                    const sortedDocs = snapshot.docs.sort((a, b) => (b.data().createdAt?.seconds || 0) - (a.data().createdAt?.seconds || 0));
+                    sortedDocs.forEach(doc => {
+                        const news = doc.data();
+                        const newsItem = document.createElement('div');
+                        newsItem.className = 'glass-card p-6 rounded-lg text-left';
+                        newsItem.innerHTML = `
+                            <h3 class="text-2xl font-orbitron font-bold text-cyan-400">${news.title}</h3>
+                            <p class="text-xs text-gray-500 mb-4">${news.createdAt?.toDate().toLocaleString()}</p>
+                            <p class="text-gray-300">${news.content}</p>
+                        `;
+                        newsList.appendChild(newsItem);
+                    });
+                });
             }
 
             function setupLeaderboard() {
@@ -1032,4 +1138,3 @@
     </script>
 </body>
 </html>
-
